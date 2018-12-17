@@ -12,11 +12,11 @@ A script for selling drugs to the NPC of your map.
 
 2.) Place anywhere inside your resource folder
 
-3.) Add start npcdrugsales to your server config file
+3.) Add start drugscnxrewrite to your server config file
 
 # Editing Notifications
 
-Editing notifications is easy and can be done in both the server.lua script and the client.lua script. Simply open them in your favorite text editor and search for the notification you wish to change. Then edit it so what you would like it to say. If you need more detailed help, please do not hesitate to contact me!
+Editing notifications is easy and can be done in corresponding locale.lua script. Simply open them in your favorite text editor and search for the notification you wish to change. Then edit it so what you would like it to say. If you need more detailed help, please do not hesitate to contact me!
 
 # Editing Variables
 
