@@ -13,6 +13,12 @@ local PlayersSellingWeed       = {}
 local PlayersHarvestingOpium   = {}
 local PlayersTransformingOpium = {}
 local PlayersSellingOpium      = {}
+local _source = source
+local xPlayer = ESX.GetPlayerFromId(source)
+local selling = false
+local success = false
+local copscalled = false
+local notintrested = false
 
 TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 
@@ -494,7 +500,7 @@ local function SellMeth(source)
 				TriggerClientEvent('esx:showNotification', _source, _U('no_pouches_sale'))
 			else
 				xPlayer.removeInventoryItem('meth_pouch', 1)
-				xPlayer.addAccountMoney('black_money', Confif.MethDealer)
+				xPlayer.addAccountMoney('black_money', Confif.MethSellDealer)
 				TriggerClientEvent('esx:showNotification', source, _U('sold_one_meth'))
 				
 				SellMeth(source)
@@ -659,7 +665,7 @@ local function SellOpium(source)
 				TriggerClientEvent('esx:showNotification', source, _U('no_pouches_sale'))
 			else
 				xPlayer.removeInventoryItem('opium_pouch', 1)
-				xPlayer.addAccountMoney('black_money', Config.OpiumDealer)
+				xPlayer.addAccountMoney('black_money', Config.OpiumSellDealer)
 				TriggerClientEvent('esx:showNotification', source, _U('sold_one_opium'))
 				
 				SellOpium(source)
@@ -708,7 +714,6 @@ AddEventHandler('esx_drugscnxrewrite:GetUserInventory', function(currentZone)
 		xPlayer.getInventoryItem('weed_pouch').count, 
 		xPlayer.getInventoryItem('opium').count, 
 		xPlayer.getInventoryItem('opium_pouch').count,
-		xPlayer.job.name, 
 		currentZone
 	)
 end)
@@ -722,4 +727,185 @@ ESX.RegisterUsableItem('weed', function(source)
 
 	TriggerClientEvent('esx_drugscnxrewrite:onPot', _source)
 	TriggerClientEvent('esx:showNotification', _source, _U('used_one_weed'))
+end)
+
+-- Selling to NPC Functions
+-- Drug Selling to NPC Trigger event
+RegisterNetEvent('drugs:trigger')
+AddEventHandler('drugs:trigger', function()
+selling = true
+    if selling == true then
+		TriggerEvent('pass_or_fail')
+		TriggerClientEvent("pNotify:SetQueueMax", source, "lmao", 1)
+		TriggerClientEvent("pNotify:SendNotification", source, {
+	        text = _U('convince_npc'),
+	        type = "error",
+	        queue = "lmao",
+	        timeout = 2500,
+	        layout = "Centerleft"
+    	})
+ 	end
+end)
+
+-- Pass Player Job
+RegisterServerEvent('fetchjob')
+AddEventHandler('fetchjob', function()
+    local xPlayer  = ESX.GetPlayerFromId(source)
+    TriggerClientEvent('getjob', source, xPlayer.job.name)
+end)
+
+-- Sell to NPC Functions/Events
+RegisterNetEvent('drugs:sell')
+AddEventHandler('drugs:sell', function()
+	local xPlayer = ESX.GetPlayerFromId(source)
+	local weedp = xPlayer.getInventoryItem('weed_pouch').count
+	local cokep 	  = xPlayer.getInventoryItem('coke_pouch').count
+	local methp = xPlayer.getInventoryItem('meth_pouch').count
+	local opiump = xPlayer.getInventoryItem('opium_pouch').count
+	local sellbags = math.random (Config.SellNPCMin,Config.SellNPCMax)
+	local blackMoneyMade = 0
+
+	if weedp >= 1 and success == true then -- Selling Weed
+		blackMoneyMade = sellbags * Config.WeedSellNPC
+		TriggerClientEvent("pNotify:SetQueueMax", source, "lmao", 5)
+		TriggerClientEvent("pNotify:SendNotification", source, {
+			text = _U('sold_weed_npc') .. blackMoneyMade ,
+			type = "success",
+			progressBar = false,
+			queue = "lmao",
+			timeout = 2000,
+			layout = "CenterLeft"
+		})
+		TriggerClientEvent("animation", source)
+		TriggerClientEvent("test", source)
+		xPlayer.removeInventoryItem('weed_pouch', 1)
+		xPlayer.addAccountMoney('black_money', blackMoneyMade)
+		selling = false
+	elseif cokep >= 1 and success == true then --Selling Coke
+		blackMoneyMade = sellbags * Config.CokeSellNPC
+		TriggerClientEvent("pNotify:SetQueueMax", source, "lmao", 5)
+		TriggerClientEvent("pNotify:SendNotification", source, {
+			text = _U('sold_coke_npc') .. blackMoneyMade ,
+			type = "success",
+			progressBar = false,
+			queue = "lmao",
+			timeout = 2000,
+			layout = "CenterLeft"
+		})
+		TriggerClientEvent("animation", source)
+		xPlayer.removeInventoryItem('coke_pouch', 1)
+		xPlayer.addAccountMoney('black_money', blackMoneyMade)
+		selling = false
+	elseif methp >= 1 and success == true then -- Selling Meth
+		blackMoneyMade = sellbags * Config.MethSellNPC
+		TriggerClientEvent("pNotify:SetQueueMax", source, "lmao", 5)
+		TriggerClientEvent("pNotify:SendNotification", source, {
+			text = _U('sold_meth_npc') .. blackMoneyMade ,
+			type = "success",
+			progressBar = false,
+			queue = "lmao",
+			timeout = 2000,
+			layout = "CenterLeft"
+		})
+		TriggerClientEvent("animation", source)
+		xPlayer.removeInventoryItem('meth_pouch', 1)
+		xPlayer.addAccountMoney('black_money', blackMoneyMade)
+		selling = false
+	elseif opiump >= 1 and success == true then -- Selling Opium
+		blackMoneyMade = sellbags * Config.OpiumSellNPC
+		TriggerClientEvent("pNotify:SetQueueMax", source, "lmao", 5)
+		TriggerClientEvent("pNotify:SendNotification", source, {
+			text = _U('sold_opium_npc') .. blackMoneyMade ,
+			type = "success",
+			progressBar = false,
+			queue = "lmao",
+			timeout = 2000,
+			layout = "CenterLeft"
+		})
+		TriggerClientEvent("animation", source)
+		xPlayer.removeInventoryItem('opium_pouch', 1)
+		xPlayer.addAccountMoney('black_money', blackMoneyMade)
+		selling = false
+	elseif selling == true and success == false and notintrested == true then -- NPC not interested
+		TriggerClientEvent("pNotify:SetQueueMax", source, "lmao", 5)
+		TriggerClientEvent("pNotify:SendNotification", source, {
+			text = _U('npc_not_interested'),
+			type = "error",
+			progressBar = false,
+			queue = "lmao",
+			timeout = 2000,
+			layout = "CenterLeft"
+		})
+			selling = false
+	elseif methp < 1 and cokep < 1 and weedp < 1 and opiump < 1 then -- No baggies
+		TriggerClientEvent("pNotify:SetQueueMax", source, "lmao", 5)
+		TriggerClientEvent("pNotify:SendNotification", source, {
+			text = _U('no_drugs'),
+			type = "error",
+			progressBar = false,
+			queue = "lmao",
+			timeout = 2000,
+			layout = "CenterLeft"
+		})
+	elseif copscalled == true and success == false then -- NPC Texts Cops
+		TriggerClientEvent("pNotify:SetQueueMax", source, "lmao", 5)
+		TriggerClientEvent("pNotify:SendNotification", source, {
+			text = _U('text_cops'),
+			type = "error",
+			progressBar = false,
+			queue = "lmao",
+			timeout = 2000,
+			layout = "CenterLeft"
+		})
+		TriggerClientEvent("notifyc", source)
+		selling = false
+	end
+end)
+
+-- Sell success randomizer
+RegisterNetEvent('pass_or_fail')
+AddEventHandler('pass_or_fail', function()
+	local percent = math.random(1, 11)
+	if percent == 7 or percent == 8 or percent == 9 then -- Sell Fails on 7,8,9
+		success = false
+		notintrested = true
+	elseif percent == 10 or percent == 11 then -- Call Cops on 10,11
+		notintrested = false
+		success = false
+		copscalled = true
+	else -- Sell on 1,2,3,4,5,6
+		success = true
+		notintrested = false
+	end
+end)
+
+-- distance check while selling
+RegisterNetEvent('sell_dis')
+AddEventHandler('sell_dis', function()
+	TriggerClientEvent("pNotify:SetQueueMax", source, "lmao", 5)
+	TriggerClientEvent("pNotify:SendNotification", source, {
+		text = _U('too_far'),
+		type = "error",
+		progressBar = false,
+		queue = "lmao",
+		timeout = 2000,
+		layout = "CenterLeft"
+	})
+end)
+
+-- Baggies to sell check
+RegisterNetEvent('checkD')
+AddEventHandler('checkD', function()
+	local xPlayer = ESX.GetPlayerFromId(source)
+	local methp = xPlayer.getInventoryItem('meth_pouch').count
+	local cokep 	  = xPlayer.getInventoryItem('coke_pouch').count
+	local weedp = xPlayer.getInventoryItem('weed_pouch').count
+	local opiump = xPlayer.getInventoryItem('opium_pouch').count
+
+	if methp >= 1 or cokep >= 1 or weedp >= 1 or opiump >= 1 then
+		TriggerClientEvent("checkR", source, true)
+	else
+		TriggerClientEvent("checkR", source, false)
+	end
+
 end)
