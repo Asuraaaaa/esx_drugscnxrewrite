@@ -4,6 +4,7 @@ version '0.0.1'
 
 server_scripts {
 	'@es_extended/locale.lua',
+	'@mysql-async/lib/MySQL.lua',
 	'locales/en.lua',
 	'server/server.lua',
 	'config.lua'
